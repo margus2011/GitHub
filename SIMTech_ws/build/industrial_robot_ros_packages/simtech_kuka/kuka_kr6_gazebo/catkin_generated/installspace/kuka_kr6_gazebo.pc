@@ -1,0 +1,8 @@
+prefix=/home/jeeva/GitHub/SIMTech_ws/install
+
+Name: kuka_kr6_gazebo
+Description: Description of kuka_kr6_gazebo
+Version: 0.0.1
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

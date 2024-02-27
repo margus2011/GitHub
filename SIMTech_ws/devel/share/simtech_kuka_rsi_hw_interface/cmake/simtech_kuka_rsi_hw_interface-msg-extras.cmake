@@ -1,0 +1,2 @@
+set(simtech_kuka_rsi_hw_interface_MESSAGE_FILES "/home/jeeva/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/ethernet_communication_interface/simtech_kuka_rsi_hw_interface/msg/MsgCartPosition.msg;/home/jeeva/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/ethernet_communication_interface/simtech_kuka_rsi_hw_interface/msg/MsgCartVelocity.msg")
+set(simtech_kuka_rsi_hw_interface_SERVICE_FILES "")
