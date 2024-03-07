@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/test_basics.dir/test_basics.cpp.o  -o /home/jeeva/GitHub/SIMTech_ws/devel/lib/geometric_shapes/test_basics   -L/home/jeeva/GitHub/SIMTech_ws/build/gtest  -Wl,-rpath,/home/jeeva/GitHub/SIMTech_ws/build/gtest:/home/jeeva/GitHub/SIMTech_ws/build/gtest/lib ../../gtest/lib/libgtest.so -lpthread 

@@ -2,4 +2,4 @@
 <launch>
     <node name="moveit_extension" pkg="kuka_advanced_manipulation_pkg" type="kuka_advanced_manipulation.py" output="screen">
     </node>
-</launch>  
+</launch>
