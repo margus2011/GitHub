@@ -21,6 +21,14 @@
         <joint name="joint_a5" value="0" />
         <joint name="joint_a6" value="0" />
     </group_state>
+    <group_state name="origin-position" group="manipulator">
+        <joint name="joint_a1" value="0" />
+        <joint name="joint_a2" value="-2.32" />
+        <joint name="joint_a3" value="2.09" />
+        <joint name="joint_a4" value="3.157" />
+        <joint name="joint_a5" value="-1.806" />
+        <joint name="joint_a6" value="0" />
+    </group_state>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="FixedBase" type="fixed" parent_frame="world" child_link="base_link" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->

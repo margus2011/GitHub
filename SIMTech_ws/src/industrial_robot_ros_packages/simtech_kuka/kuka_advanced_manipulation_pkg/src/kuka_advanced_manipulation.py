@@ -853,11 +853,11 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         success = True
         #Selects the arm to be planned
         if arm_side == "left":
-                arm = arm_left
-                fkln = ['arm_left_link_7_t'] #Modify with the name of the final link of the left arm
+            arm = arm_left
+            fkln = ['link_6'] #Modify with the name of the final link of the left arm
         if len(EE_ang_speed)==0: #If the angular speed limit is not specified, it considers a limit of 1 mm/s --> 0.7 deg/s
-                for s in EE_speed:
-                        EE_ang_speed.append(s*0.7)
+            for s in EE_speed:
+                EE_ang_speed.append(s*0.7)
 
         #Convert to rads
         for i in range(len(EE_speed)):
@@ -914,7 +914,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         fk_srv = rospy.ServiceProxy('compute_fk', GetPositionFK)
         rs = RobotState()
         for j_name in plan.joint_trajectory.joint_names:
-                rs.joint_state.name.append(j_name)
+                rs.joint_state.name.append(j_name)      
         for plan in all_plans:
                 plan_poses = []
                 traj_mov_i_position = 0
@@ -922,22 +922,15 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
                 for joint_state in plan.joint_trajectory.points:
                         rs.joint_state.position = []
                         for joint in joint_state.positions:
-                                rs.joint_state.position.append(joint)
-                        header = Header(0,rospy.Time.now(),"torso_base_link") #Modify with the frame_id of the robot
+                                rs.joint_state.position.append(joint)              
+                        header = Header(0,rospy.Time.now(),"base_link") #Modify with the frame_id of the robot
                         header.frame_id = plan.joint_trajectory.header.frame_id
-                        #
-                        fk_result = fk_srv(header, fkln, rs)
-                        if fk_result.pose_stamped and isinstance(fk_result.pose_stamped, list):
-                                plan_pose_meters = fk_result.pose_stamped[0].pose
-                        else:
-                        # Handle the error appropriately here
-                                print("Error: pose_stamped is empty or not a list")
                         plan_pose_meters = fk_srv(header, fkln, rs).pose_stamped[0].pose
                         plan_pose_mm = copy.deepcopy(plan_pose_meters)
                         plan_pose_mm.position.x *= 1000
                         plan_pose_mm.position.y *= 1000
                         plan_pose_mm.position.z *= 1000
-                        plan_poses.append(plan_pose_mm)
+                        plan_poses.append(plan_pose_mm)                             
                         if len(plan_poses) > 1:
                                 traj_mov_i_position += compute_distance(plan_poses[-2], plan_poses[-1])
                                 traj_mov_i_angle += compute_angle_distance(plan_poses[-2], plan_poses[-1])
@@ -963,7 +956,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         corrected_traj, success_lin = adjust_plan_speed(traj_poses, EE_speed_aux, v_change, traj_mov_position, max_linear_accel, all_plans, linear = True)
         corrected_traj_ang, success_ang = adjust_plan_speed(traj_poses, EE_ang_speed_aux, v_change_ang, traj_mov_angle, max_ang_accel, all_plans, linear = False)
         if not success_lin or not success_ang:
-            success = False
+            success = False   
 
         #Merges the linear and angular constraint plans by selecting the larger times, to not exceed any of the limits.
         first_accel = True
@@ -1036,7 +1029,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         full_corrected_traj_with_limits[-1]['Jspeed'] = copy.deepcopy(zero_Jvel)
 
         #Uncomment if we want to visualize all the information of the generated plan
-        """
+        '''
         i=0
         for traj_point in full_corrected_traj_with_limits:
                 print(i)
@@ -1049,7 +1042,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
                 print("Joint accelerations: " + str (traj_point['Jaccel']))
                 print("----------------------")
                 i+=1
-        """
+        '''
 
         #Adjust the generated plan to the RobotTrajectory() msg structure
         new_plan = RobotTrajectory()
@@ -1074,120 +1067,125 @@ def user_defined_cartesian(coordinates):
         ### Coordinates - Refers to a list containing coordinates of the points [x,y,z]
         current_pose = arm_left.get_current_pose().pose
         new_pose_left = copy.deepcopy(current_pose)
-        new_pose_left.position.x += coordinates[0]
-        new_pose_left.position.y += coordinates[1]
-        new_pose_left.position.z += coordinates[2]       
+        new_pose_left.position.x += float(coordinates[0])
+        new_pose_left.position.y += float(coordinates[1])
+        new_pose_left.position.z += float(coordinates[2]) 
+        new_pose_left.orientation.x += float(coordinates[3])      
+        new_pose_left.orientation.y += float(coordinates[4])
+        new_pose_left.orientation.z += float(coordinates[5])
 
         #Speed profile
         plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [70.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
-        print("Executed custom coordinates")
+        print("Executed custom coordinates -",coordinates)
+
+def origin_defined_cartesian(coordinates,pose):
+        ### Coordinates - Refers to a list containing coordinates of the points [x,y,z]
+        new_pose_left = copy.deepcopy(pose)
+        new_pose_left.position.x += float(coordinates[0])
+        new_pose_left.position.y += float(coordinates[1])
+        new_pose_left.position.z += float(coordinates[2]) 
+        new_pose_left.orientation.x += float(coordinates[3])      
+        new_pose_left.orientation.y += float(coordinates[4])
+        new_pose_left.orientation.z += float(coordinates[5])
+
+        #Speed profile
+        plan, success = compute_cartesian_path_velocity_control([[pose, new_pose_left]], [20.0])
+        if success:
+                arm_left.execute(plan, wait=True)
+        time.sleep(0.5)
+        print("Executed custom coordinates -",coordinates)
+
+def user_cartesian_cont(cords):
+        origin=poses=[]
+        current_pose = arm_left.get_current_pose().pose        
+        for i in range(len(cords)):
+                if i!=0:
+                        delta=[]
+                        for j in range(3):
+                                delta.append((cords[i][j]-origin[j])*0.01)
+                        new_pose = copy.deepcopy(current_pose)
+                        new_pose.position.x += float(delta[0])
+                        new_pose.position.y += float(delta[1])
+                        new_pose.position.z += float(delta[2])
+                        poses.append(new_pose)
+                else:
+                        origin=cords[i]
+                        new_pose_left = copy.deepcopy(current_pose)
+                        poses.append(new_pose_left)
+        plan, success = compute_cartesian_path_velocity_control([poses], [20.0])
+        if success:
+                arm_left.execute(plan, wait=True)
+        time.sleep(0.5)
+        print("Executed Set of Coordinates")                
+                
+                      
 
 ######################################################################################################################################
 
 if __name__ == '__main__':
         #IMPORTANT: Modify all the named target poses to match the poses defined in your SRDF file
         #Define parameters of the tools for the ATC objects
-        eef_link_left = "left_tool_exchanger"
-        touch_links_left = ["left_tool_exchanger"]
-        eef_link_right = "right_tool_exchanger"
-        touch_links_right = ["right_tool_exchanger"]
+        eef_link_left = "link_6"
+        touch_links_left = ["link_6"]
 
         gripper_end_frame = PyKDL.Frame() 
-        gripper_end_frame.p = PyKDL.Vector(0, 0, 0.275) 
+        gripper_end_frame.p = PyKDL.Vector(0, 0, 0.3) 
 
         EE_file_path_gripper = os.path.join(os.path.dirname(__file__), '../../simtech_kuka/simtech_kuka_workcell/meshes/spindle/visual/spindle.stl')
 
         gripper_left = EEF(EE_end_frame = gripper_end_frame, x = 0.246, y = 0.7048, z = 0.35, name = "EEF_gripper_left", path = EE_file_path_gripper)
-user_defined_cartesian([0.2,0.1,0.1])
+
+        #Moving to initial position
+        print("Moving arms to initial position")
+        arm_left.set_named_target("origin-position")
+        arm_left.go(wait=True)
+        print("Moved to Initial Position")
+        time.sleep(0.5)
+
+        with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
+                cords=[]
+                am_cords=[]
+                for j in range(20):
+                        i=file.readline()
+                        splitted=i.split()
+                        cords=[float(x[1:]) for x in splitted[1:4]]
+                        am_cords.append(cords)
+                user_cartesian_cont(am_cords)       
+
+
 '''
-        ### test1: single-arm speed control
-        print("------------------")
-        print("Test 1: single-arm speed control")
-        trash_pose = arm_left.get_current_pose().pose
-        wrist_pose_left = arm_left.get_current_pose().pose
-        wrist_pose_left_2 = copy.deepcopy(wrist_pose_left)
-        wrist_pose_left_2.position.x -= 0.15
-        wrist_pose_left_3 = copy.deepcopy(wrist_pose_left_2)
-        wrist_pose_left_3.position.x -= 0.1
-        wrist_pose_left_4 = copy.deepcopy(wrist_pose_left_3)
-        wrist_pose_left_4.position.x -= 0.15
-
-        #Speed profile
-        plan, success = compute_cartesian_path_velocity_control([[wrist_pose_left, wrist_pose_left_2],[wrist_pose_left_2, wrist_pose_left_3],[wrist_pose_left_3, wrist_pose_left_4]], [70.0, 30.0, 70.0])
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(0.5)
-        print("First movement done")
-
-        #Acceleration ramps
-        plan, success = compute_cartesian_path_velocity_control([[wrist_pose_left_4, wrist_pose_left]], [40.0], max_linear_accel=20)
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(0.5)
-        print("Second movement done")
-
-        #Not reaches the target velocity
-        plan, success = compute_cartesian_path_velocity_control([[wrist_pose_left, wrist_pose_left_3]], [70.0], max_linear_accel=5)
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(0.5)
-        print("Third movement done")
-
-        #2D circle
-        circle_rad = 0.125
-        wrist_pose_left = arm_left.get_current_pose().pose
-        center_pose = copy.deepcopy(wrist_pose_left)
-        center_pose.position.x += circle_rad
-        lenght_circle = 20
-        circle_points = [copy.deepcopy(wrist_pose_left)]
-        for i in range(lenght_circle):
-                new_pose = copy.deepcopy(circle_points[-1])
-                new_pose.position.x = circle_points[-1].position.x + circle_rad*2/(lenght_circle)
-                if circle_rad**2 - (new_pose.position.x - center_pose.position.x)**2 > 0:
-                        new_pose.position.y = math.sqrt(circle_rad**2 - (new_pose.position.x - center_pose.position.x)**2) + center_pose.position.y
-                else:
-                        new_pose.position.y = center_pose.position.y
-                circle_points.append(new_pose)
-
-        plan, success = compute_cartesian_path_velocity_control([circle_points], [80.0])
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(0.5)
-        print("Forth movement done")
-
-
-        ### test2: single-arm speed control angular motion
-        print("------------------")
-        print("Test 2: single-arm speed control angular motion")
-        distance_movement = -0.35
-        angle_movement = 175
-        n_points = 150
-        wrist_pose_left = arm_left.get_current_pose().pose
-        rot_poses = []
-        rot_poses.append(wrist_pose_left)
-        step = 100
-        frame = pose_to_frame(copy.deepcopy(wrist_pose_left))
-        for i in range(n_points+1):
-                angle = (((i+1)*angle_movement)/n_points)*(math.pi/180)
-                frame_rot = PyKDL.Frame()
-                frame_rot.M = frame_rot.M.RotZ(-angle)
-                frame_new = frame * frame_rot
-                pose = frame_to_pose(frame_new)
-                pose.position.x += distance_movement*(float(i+1)/float(n_points))
-                rot_poses.append(pose)
-
-        plan, success = compute_cartesian_path_velocity_control([rot_poses], [50.0], EE_ang_speed = [200])
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(1)
-        print("First movement done")
-
-        rot_poses.reverse()
-        plan, success = compute_cartesian_path_velocity_control([rot_poses], [50.0], EE_ang_speed = [10])
-        if success:
-                arm_left.execute(plan, wait=True)
-        time.sleep(1)
-        print("Second movement done") '''
+        with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
+                origin=True
+                prev_delta=new_delta=[]
+                for j in range(20):
+                        i=file.readline()
+                        splitted=i.split()
+                        cords=[float(x[1:]) for x in splitted[1:4]]
+                        if not origin:
+                                delta=[]
+                                for a in range(3):
+                                        delta.append((cords[a]-origin_val[a])*0.01)
+                                delta+=[0,0,0]
+                                if j>=2:
+                                      new_delta=delta
+                                      dist=[]
+                                      for x in range(3):
+                                            dist.append(new_delta[x]-prev_delta[x])
+                                      dist+=[0,0,0]      
+                                      user_defined_cartesian(dist)
+                                      prev_delta=new_delta
+                                elif j==1:
+                                      prev_delta=delta      
+                        else:
+                                origin_val=cords
+                                origin=False
+'''
+'''    
+        user_defined_cartesian([-2,0,2,0,0,0]) 
+        #cords=eval(input("enter coordinates - "))
+        user_defined_cartesian([-1,0,-1,0,0,0])
+  
+'''
