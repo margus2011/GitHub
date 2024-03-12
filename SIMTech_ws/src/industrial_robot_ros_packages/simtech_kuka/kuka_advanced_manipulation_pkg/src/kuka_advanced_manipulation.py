@@ -1148,7 +1148,7 @@ if __name__ == '__main__':
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 cords=[]
                 am_cords=[]
-                for j in range(20):
+                for j in range(100):
                         i=file.readline()
                         splitted=i.split()
                         cords=[float(x[1:]) for x in splitted[1:4]]
