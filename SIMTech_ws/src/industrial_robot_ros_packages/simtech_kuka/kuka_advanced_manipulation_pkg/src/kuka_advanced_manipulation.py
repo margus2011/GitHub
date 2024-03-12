@@ -1105,7 +1105,7 @@ def user_cartesian_cont(cords):
                 if i!=0:
                         delta=[]
                         for j in range(3):
-                                delta.append((cords[i][j]-origin[j])*0.01)
+                                delta.append((cords[i][j]-origin[j])*0.001)
                         new_pose = copy.deepcopy(current_pose)
                         new_pose.position.x += float(delta[0])
                         new_pose.position.y += float(delta[1])
@@ -1115,7 +1115,7 @@ def user_cartesian_cont(cords):
                         origin=cords[i]
                         new_pose_left = copy.deepcopy(current_pose)
                         poses.append(new_pose_left)
-        plan, success = compute_cartesian_path_velocity_control([poses], [20.0])
+        plan, success = compute_cartesian_path_velocity_control([poses], [50.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
@@ -1148,7 +1148,7 @@ if __name__ == '__main__':
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 cords=[]
                 am_cords=[]
-                for j in range(100):
+                for j in range(1600):
                         i=file.readline()
                         splitted=i.split()
                         cords=[float(x[1:]) for x in splitted[1:4]]
