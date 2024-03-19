@@ -1155,7 +1155,6 @@ if __name__ == '__main__':
                         am_cords.append(cords)
                 user_cartesian_cont(am_cords)       
 
-
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 origin=True

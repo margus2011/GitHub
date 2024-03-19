@@ -22,12 +22,12 @@
         <joint name="joint_a6" value="0" />
     </group_state>
     <group_state name="origin-position" group="manipulator">
-        <joint name="joint_a1" value="3.229" />
-        <joint name="joint_a2" value="-1.399" />
-        <joint name="joint_a3" value="-1.731" />
-        <joint name="joint_a4" value="-3.26" />
-        <joint name="joint_a5" value="-0.009" />
-        <joint name="joint_a6" value="-1.46" />
+        <joint name="joint_a1" value="0.041" />
+        <joint name="joint_a2" value="-2.443" />
+        <joint name="joint_a3" value="2.191" />
+        <joint name="joint_a4" value="1.514" />
+        <joint name="joint_a5" value="-1.558" />
+        <joint name="joint_a6" value="-0.231" />
     </group_state>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="FixedBase" type="fixed" parent_frame="world" child_link="base_link" />
