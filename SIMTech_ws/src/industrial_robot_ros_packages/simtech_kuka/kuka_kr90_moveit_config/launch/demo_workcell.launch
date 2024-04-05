@@ -24,6 +24,7 @@
 
   <!-- Given the published joint states, publish tf for the robot links -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+      <param name="publish_frequency" value="250" />
 
   <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
   <include file="$(find kuka_kr90_moveit_config)/launch/move_group_workcell.launch">
@@ -38,6 +39,27 @@
     <arg name="config" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
   </include>
+
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(find simtech_kuka_rsi_hw_interface)/config/hardware_controllers.yaml" command="load"/>
+    <!-- Load standard kuka controller joint names from YAML file to parameter server -->
+    <rosparam file="$(find simtech_kuka_rsi_hw_interface)/config/controller_joint_names.yaml" command="load"/>
+    <!-- Load ethernate connection interface rosparameter server -->
+    <rosparam file="$(find simtech_kuka_rsi_hw_interface)/config/rsi_interface_params.yaml" command="load"/>
+
+    <!-- Load controllers -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        args="position_trajectory_controller joint_state_controller"/>    
+
+
+    <!-- Start node without FT sensor -->
+    <node name="simtech_kuka_rsi_hw_interface" pkg="simtech_kuka_rsi_hw_interface"
+      type="simtech_kuka_rsi_hw_interface_node" respawn="false"
+      output="screen"
+      required="true"
+      launch-prefix="nice -n -20"/>
+      <!-- launch-prefix="nice -n -20" -->
+
 
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find kuka_kr90_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)">

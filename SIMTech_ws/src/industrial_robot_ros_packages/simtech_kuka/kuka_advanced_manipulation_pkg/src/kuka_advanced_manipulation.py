@@ -1047,7 +1047,7 @@ def compute_cartesian_path_velocity_control(waypoints_list, EE_speed, EE_ang_spe
         #Adjust the generated plan to the RobotTrajectory() msg structure
         new_plan = RobotTrajectory()
         new_plan.joint_trajectory.header.frame_id = "base_link"
-        new_plan.joint_trajectory.joint_names = copy.deepcopy(rs.joint_state.name)
+        new_plan.joint_trajectory.joint_names = copy.deepcopy(rs.joint_state.name) 
         for state in full_corrected_traj_with_limits:
                 point = JointTrajectoryPoint()
                 point.positions = copy.deepcopy(state['state'])
@@ -1120,6 +1120,22 @@ def user_cartesian_cont(cords):
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
         print("Executed Set of Coordinates")                
+
+def get_joint_state():
+    # Define a one-time callback inside the function
+    def joint_state_callback(msg):
+        a=[]
+        rospy.loginfo("Received joint states")
+        for i, name in enumerate(msg.name):
+            position_in_radians = msg.position[i]  # Assuming positions are in radians
+            a.append(position_in_radians)
+        # After receiving the message, unregister the subscriber
+        rospy.Subscriber("/joint_states", JointState, joint_state_callback).unregister()
+        return a
+
+    rospy.wait_for_message("/joint_states", JointState, timeout=None)
+    rospy.sleep(1)  # Just to make sure the callback has time to log information
+    return joint_state_callback(msg)
                 
                       
 
@@ -1144,7 +1160,19 @@ if __name__ == '__main__':
         arm_left.go(wait=True)
         print("Moved to Initial Position")
         time.sleep(0.5)
+        #print('Moving MoveIt to current position of the robot')
 
+        
+        user_defined_cartesian([0,0,0.005,0,0,0])
+'''
+        print("Moving arms to initial position")
+        arm_left.set_named_target("origin-position")
+        arm_left.go(wait=True)
+        print("Moved to Initial Position")
+        time.sleep(0.5)
+'''
+
+'''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 cords=[]
                 am_cords=[]
@@ -1153,7 +1181,8 @@ if __name__ == '__main__':
                         splitted=i.split()
                         cords=[float(x[1:]) for x in splitted[1:4]]
                         am_cords.append(cords)
-                user_cartesian_cont(am_cords)       
+                user_cartesian_cont(am_cords)  
+'''     
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
