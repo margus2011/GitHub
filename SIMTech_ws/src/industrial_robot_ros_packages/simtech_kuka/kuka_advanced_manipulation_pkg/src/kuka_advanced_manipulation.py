@@ -1122,20 +1122,18 @@ def user_cartesian_cont(cords):
         print("Executed Set of Coordinates")                
 
 def get_joint_state():
+    msg=rospy.wait_for_message("/joint_states", JointState, timeout=None)
+    print("Received joint states")
     # Define a one-time callback inside the function
     def joint_state_callback(msg):
         a=[]
-        rospy.loginfo("Received joint states")
         for i, name in enumerate(msg.name):
             position_in_radians = msg.position[i]  # Assuming positions are in radians
+            #print(f"Joint {name}: Position in radians: {position_in_radians}")
             a.append(position_in_radians)
-        # After receiving the message, unregister the subscriber
-        rospy.Subscriber("/joint_states", JointState, joint_state_callback).unregister()
         return a
-
-    rospy.wait_for_message("/joint_states", JointState, timeout=None)
-    rospy.sleep(1)  # Just to make sure the callback has time to log information
     return joint_state_callback(msg)
+    rospy.sleep(1)  # Just to make sure the callback has time to log information
                 
                       
 
@@ -1153,24 +1151,18 @@ if __name__ == '__main__':
         EE_file_path_gripper = os.path.join(os.path.dirname(__file__), '../../simtech_kuka/simtech_kuka_workcell/meshes/spindle/visual/spindle.stl')
 
         gripper_left = EEF(EE_end_frame = gripper_end_frame, x = 0.246, y = 0.7048, z = 0.35, name = "EEF_gripper_left", path = EE_file_path_gripper)
-
-        #Moving to initial position
-        print("Moving arms to initial position")
-        arm_left.set_named_target("origin-position")
-        arm_left.go(wait=True)
-        print("Moved to Initial Position")
-        time.sleep(0.5)
-        #print('Moving MoveIt to current position of the robot')
-
         
-        user_defined_cartesian([0,0,0.005,0,0,0])
-'''
+        #user_defined_cartesian([0,0,0.005,0,0,0])
+
         print("Moving arms to initial position")
-        arm_left.set_named_target("origin-position")
+        #arm_left.set_named_target("origin-position")
+        arm_left.set_joint_value_target(get_joint_state())
         arm_left.go(wait=True)
         print("Moved to Initial Position")
         time.sleep(0.5)
-'''
+
+        user_defined_cartesian([0,0.5,0,0,0,0])
+
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
