@@ -44,4 +44,6 @@
     <disable_collisions link1="link_6" link2="laser_head_link" reason="Adjacent" />
     <disable_collisions link1="tool0" link2="tcp_link" reason="Adjacent" />
     <disable_collisions link1="tool0" link2="link_6" reason="Adjacent" />
+    <disable_collisions link1="tool0" link2="link_5" reason="Adjacent" />
+    <disable_collisions link1="laser_head_link" link2="link_5" reason="Adjacent" />
 </robot>

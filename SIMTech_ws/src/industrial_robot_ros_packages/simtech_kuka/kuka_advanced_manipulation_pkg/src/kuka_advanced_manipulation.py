@@ -1075,7 +1075,7 @@ def user_defined_cartesian(coordinates):
         new_pose_left.orientation.z += float(coordinates[5])
 
         #Speed profile
-        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [70.0])
+        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [60.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
@@ -1161,20 +1161,21 @@ if __name__ == '__main__':
         print("Moved to Initial Position")
         time.sleep(0.5)
 
-        user_defined_cartesian([0,0.5,0,0,0,0])
+        #user_defined_cartesian([-1,-1,2,0,0,0])
+        user_defined_cartesian([0,0,0.05,0,0,0])
 
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 cords=[]
                 am_cords=[]
-                for j in range(1600):
+                for j in range(500):
                         i=file.readline()
                         splitted=i.split()
                         cords=[float(x[1:]) for x in splitted[1:4]]
                         am_cords.append(cords)
                 user_cartesian_cont(am_cords)  
-'''     
+    '''      
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   

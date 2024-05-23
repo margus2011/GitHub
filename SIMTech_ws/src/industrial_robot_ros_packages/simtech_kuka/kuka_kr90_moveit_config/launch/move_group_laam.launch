@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find kuka_kr90_moveit_config)/launch/planning_context_laam.launch" />
+  <!-- <include file="$(find kuka_kr90_moveit_config)/launch/planning_context_laam.launch" /> -->
 
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />
