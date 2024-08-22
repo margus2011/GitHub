@@ -1075,7 +1075,7 @@ def user_defined_cartesian(coordinates):
         new_pose_left.orientation.z += float(coordinates[5])
 
         #Speed profile
-        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [60.0])
+        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [10.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
