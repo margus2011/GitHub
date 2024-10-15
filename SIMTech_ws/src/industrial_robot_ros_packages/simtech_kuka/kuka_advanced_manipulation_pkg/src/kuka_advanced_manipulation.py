@@ -1067,15 +1067,15 @@ def user_defined_cartesian(coordinates):
         ### Coordinates - Refers to a list containing coordinates of the points [x,y,z]
         current_pose = arm_left.get_current_pose().pose
         new_pose_left = copy.deepcopy(current_pose)
-        new_pose_left.position.x += float(coordinates[0])
-        new_pose_left.position.y += float(coordinates[1])
-        new_pose_left.position.z += float(coordinates[2]) 
+        new_pose_left.position.x += float(coordinates[0]*0.001)
+        new_pose_left.position.y += float(coordinates[1]*0.001)
+        new_pose_left.position.z += float(coordinates[2]*0.001) 
         new_pose_left.orientation.x += float(coordinates[3])      
         new_pose_left.orientation.y += float(coordinates[4])
         new_pose_left.orientation.z += float(coordinates[5])
 
         #Speed profile
-        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [10.0])
+        plan, success = compute_cartesian_path_velocity_control([[current_pose, new_pose_left]], [30.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
@@ -1084,12 +1084,12 @@ def user_defined_cartesian(coordinates):
 def origin_defined_cartesian(coordinates,pose):
         ### Coordinates - Refers to a list containing coordinates of the points [x,y,z]
         new_pose_left = copy.deepcopy(pose)
-        new_pose_left.position.x += float(coordinates[0])
-        new_pose_left.position.y += float(coordinates[1])
-        new_pose_left.position.z += float(coordinates[2]) 
-        new_pose_left.orientation.x += float(coordinates[3])      
-        new_pose_left.orientation.y += float(coordinates[4])
-        new_pose_left.orientation.z += float(coordinates[5])
+        new_pose_left.position.x += float(coordinates[0]*0.001)
+        new_pose_left.position.y += float(coordinates[1]*0.001)
+        new_pose_left.position.z += float(coordinates[2]*0.001) 
+        new_pose_left.orientation.x += float(coordinates[3]*0.001)      
+        new_pose_left.orientation.y += float(coordinates[4]*0.001)
+        new_pose_left.orientation.z += float(coordinates[5]*0.001)
 
         #Speed profile
         plan, success = compute_cartesian_path_velocity_control([[pose, new_pose_left]], [20.0])
@@ -1115,7 +1115,7 @@ def user_cartesian_cont(cords):
                         origin=cords[i]
                         new_pose_left = copy.deepcopy(current_pose)
                         poses.append(new_pose_left)
-        plan, success = compute_cartesian_path_velocity_control([poses], [50.0])
+        plan, success = compute_cartesian_path_velocity_control([poses], [30.0])
         if success:
                 arm_left.execute(plan, wait=True)
         time.sleep(0.5)
@@ -1161,21 +1161,51 @@ if __name__ == '__main__':
         print("Moved to Initial Position")
         time.sleep(0.5)
 
-        #user_defined_cartesian([-1,-1,2,0,0,0])
-        user_defined_cartesian([0,0,0.05,0,0,0])
+        #user_defined_cartesian([-0.3,0,0.0,0,0,0])
+
+        with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
+                cords=[]
+                am_cords=[]
+                new_motion_index=[]
+                for j in range(500):
+                        i=file.readline()
+                        splitted=i.split()
+                        cords=[float(x[1:]) for x in splitted[1:4]]
+                        am_cords.append(cords)
+                for i in range(1,len(am_cords)):
+                        if abs(am_cords[i][1]-am_cords[i-1][1]) >= 5:
+                                new_motion_index.append(i-1)
+                list_len=[]
+                for motion in range(len(new_motion_index)):
+                        if motion == 0:
+                                user_cartesian_cont(am_cords[:new_motion_index[motion]+1])
+                                user_defined_cartesian([xi - yi for xi, yi in zip(am_cords[new_motion_index[motion]+1], am_cords[new_motion_index[motion]])]+[0,0,0])
+                                #print([xi - yi for xi, yi in zip(am_cords[new_motion_index[motion]+1], am_cords[new_motion_index[motion]])]+[0,0,0])
+                        else:
+                                #pass
+                                user_cartesian_cont(am_cords[new_motion_index[motion-1]+1:new_motion_index[motion]+1])
+                                user_defined_cartesian([xi - yi for xi, yi in zip(am_cords[new_motion_index[motion]+1], am_cords[new_motion_index[motion]])]+[0,0,0])
+
+                        #print([xi - yi for xi, yi in zip(am_cords[new_motion_index[motion]+1], am_cords[new_motion_index[motion]])]+[0,0,0])
+                        #list_len.append(len(am_cords[new_motion_index[motion-1]+1:new_motion_index[motion]+1]))
+                user_cartesian_cont(am_cords[new_motion_index[len(new_motion_index)-1]+1:])
 
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
                 cords=[]
                 am_cords=[]
-                for j in range(500):
+                for j in range(200):
                         i=file.readline()
                         splitted=i.split()
                         cords=[float(x[1:]) for x in splitted[1:4]]
                         am_cords.append(cords)
                 user_cartesian_cont(am_cords)  
-    '''      
+   '''      
+        #user_defined_cartesian([-1,-1,2,0,0,0])
+        #user_defined_cartesian([-0.3,0,0.0,0,0,0])
+
+
 
 '''
         with open('/home/jeeva/catkin_ws/src/GitHub/SIMTech_ws/src/industrial_robot_ros_packages/simtech_kuka/kuka_advanced_manipulation_pkg/src/data_text.txt','r') as file:   
